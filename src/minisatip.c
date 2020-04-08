@@ -1043,6 +1043,7 @@ void set_options(int argc, char *argv[])
 	sprintf(opts.datetime_start, "%s ", asctime(info));
 	opts.datetime_start[24]=' ';
 	opts.datetime_start[25]='\0';
+
 	opts.datetime_current = (char *)malloc1(32);
 	sprintf(opts.datetime_current, "%s", " ");
 	opts.time_running = (char *)malloc1(32);
@@ -1403,6 +1404,7 @@ int read_http(sockets *s)
 	sprintf(opts.datetime_current, "%s ", asctime(info));
 	opts.datetime_current[24]=' ';
 	opts.datetime_current[25]='\0';
+
 	double seconds = difftime(now, opts.start_time);
 	int days = seconds/60/60/24;
 	seconds -= days*24*60*60;

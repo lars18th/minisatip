@@ -497,16 +497,12 @@ void satip_close_device(adapter *ad)
 	if (!sip)
 		return;
 
+	LOG("satip device %s:%d is closing", sip->sip, sip->sport);
 	if (sip->sleep)
 		LOGM("satip device %s:%d sleeping, so not sending the TEARDOWN message", sip->sip, sip->sport);
 	else
-	{
-		LOG("satip device %s:%d is closing", sip->sip, sip->sport);
 		http_request(ad, NULL, "TEARDOWN");
-	}
 	sip->sleep = 0;
-
-	http_request(ad, NULL, "TEARDOWN");
 	sip->session[0] = 0;
 	sip->sent_transport = 0;
 	if (ad->fe_sock > 0)
@@ -528,14 +524,11 @@ void satip_standby_device(adapter *ad)
 	if (!sip)
 		return;
 
+	LOG("satip device %s:%d going to standby sleep", sip->sip, sip->sport);
 	if (sip->sleep)
-	{
 		LOGM("satip device %s:%d already sleeping in standby", sip->sip, sip->sport);
-		return;
-	}
-
-	LOG("satip device %s:%d going to sleep standby", sip->sip, sip->sport);
-	http_request(ad, NULL, "TEARDOWN");
+	else
+		http_request(ad, NULL, "TEARDOWN");
 	sip->sleep = 1;
 	sip->session[0] = 0;
 }

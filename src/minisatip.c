@@ -137,7 +137,7 @@ static const struct option long_options[] =
 		{"enable-adapters", required_argument, NULL, 'e'},
 		{"unicable", required_argument, NULL, 'u'},
 		{"jess", required_argument, NULL, 'j'},
-        {"sources", required_argument, NULL, 'U'},
+		{"sources", required_argument, NULL, 'U'},
 		{"diseqc", required_argument, NULL, 'd'},
 		{"diseqc-timing", required_argument, NULL, 'q'},
 		{"diseqc-multi", required_argument, NULL, DISEQC_MULTI},
@@ -823,12 +823,12 @@ void set_options(int argc, char *argv[])
 			break;
 		}
 
-        case SOURCES_OPT:
-        {
-                adapter_sources = 1;
-                set_sources_adapters(optarg);
-                break;
-        }
+		case SOURCES_OPT:
+		{
+			adapter_sources = 1;
+			set_sources_adapters(optarg);
+			break;
+		}
 
 		case DISEQC_TIMING_OPT:
 		{
@@ -1048,8 +1048,8 @@ void set_options(int argc, char *argv[])
 	}
 	if (!is_log)
 		opts.log = 0;
-    if (!adapter_sources)
-            set_sources_adapters("");
+	if (!adapter_sources)
+		set_sources_adapters("");
 
 	// FBC setup
 	if (!access("/proc/stb/frontend/0/fbc_connect", W_OK))

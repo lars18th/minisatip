@@ -742,8 +742,7 @@ int get_free_adapter(transponder *tp)
 				match = 1;
 			if (!ad->enabled || !compare_tunning_parameters(ad->id, tp))
 				match = 1;
-			//if (match && !init_hw(fe))
-            if (match && ad->sources_pos[tp->diseqc] && !init_hw(fe))
+			if (match && ad->sources_pos[tp->diseqc] && !init_hw(fe))
 				return fe;
 		}
 		goto noadapter;
@@ -757,12 +756,10 @@ int get_free_adapter(transponder *tp)
 	for (i = 0; i < MAX_ADAPTERS; i++)
 	{
 		//first free adapter that has the same msys
-		//if ((ad = get_adapter_nw(i)) && ad->sid_cnt == 0 && delsys_match(ad, msys) && !compare_slave_parameters(ad, tp))
 		if ((ad = get_adapter_nw(i)) && ad->sid_cnt == 0 && delsys_match(ad, msys) && !compare_slave_parameters(ad, tp) && ad->sources_pos[tp->diseqc])
 			return i;
 		if (!ad && delsys_match(a[i], msys) && !compare_slave_parameters(a[i], tp)) // device is not initialized
 		{
-			//if (!init_hw(i))
 			ad = a[i];
 			if (ad->sources_pos[tp->diseqc] && !init_hw(i))
 				return i;
@@ -770,7 +767,6 @@ int get_free_adapter(transponder *tp)
 	}
 
 noadapter:
-	//LOG("no adapter found for f:%d pol:%d msys:%d", tp->freq, tp->pol, tp->sys);
 	LOG("no adapter found for src:%d f:%d pol:%d msys:%d", tp->diseqc, tp->freq, tp->pol, tp->sys);
 	dump_adapters();
 	return -1;

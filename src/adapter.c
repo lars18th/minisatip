@@ -1654,80 +1654,80 @@ void set_diseqc_adapters(char *o)
 
 void set_sources_adapters(char *o)
 {
-       int i, la, lb, st, end, j, k, adap;
-       uint64_t all = 0xFFFFFFFFFFFFFFFF;
-       char buf[1024], *arg[128], *sep;
-       SAFE_STRCPY(buf, o);
-       for (i = 0; i < MAX_ADAPTERS; i++)
-               all = (all << 1) + 1;
-       la = split(arg, buf, ARRAY_SIZE(arg), ':');
-       if ((la == 1 && strlen(arg[0]) == 0) || la < 1 || la > MAX_SOURCES)
-               goto ERR;
+	int i, la, lb, st, end, j, k, adap;
+	uint64_t all = 0xFFFFFFFFFFFFFFFF;
+	char buf[1024], *arg[128], *sep;
+	SAFE_STRCPY(buf, o);
+	for (i = 0; i < MAX_ADAPTERS; i++)
+		all = (all << 1) + 1;
+	la = split(arg, buf, ARRAY_SIZE(arg), ':');
+	if ((la == 1 && strlen(arg[0]) == 0) || la < 1 || la > MAX_SOURCES)
+		goto ERR;
 
-       LOG("Calculating adapter sources: [%s] ", o);
-       for (i = 0; i < MAX_SOURCES; i++)
-       {
-               if (i >= la)
-               {
-                       LOGM(" src=%d undefined, using all", i + 1);
-                       source_map[i] = all;
-                       continue;
-               }
+	LOG("Calculating adapter sources: [%s] ", o);
+	for (i = 0; i < MAX_SOURCES; i++)
+	{
+		if (i >= la)
+		{
+			LOGM(" src=%d undefined, using all", i + 1);
+			source_map[i] = all;
+			continue;
+		}
 
-               source_map[i] = 0;
-               if (arg[i] && arg[i][0] == '*')
-               {
-                       if (strlen(arg[i]) != 1)
-                               goto ERR;
-                       source_map[i] = all;
-                       char buf2[128];
-                       buf2[0]='\0';
-                       for (j = 1; j <= (la > MAX_ADAPTERS ? MAX_ADAPTERS : la); j++)
-                               strcat(buf2, "X");
-                       LOGM(" src=%d using adapters %s (%lu)", i + 1, buf2, (unsigned long)source_map[i]);
-                       continue;
-               }
-               char buf2[128], *arg2[128];
-               SAFE_STRCPY(buf2, arg[i]);
-               lb = split(arg2, buf2, ARRAY_SIZE(arg2), ',');
-               for (j = 0; j < lb; j++)
-               {
-                       sep = strchr(arg2[j], '-');
-                       if (sep == NULL)
-                       {
-                               adap = map_int(arg2[j], NULL);
-                               if (adap <= 0 || adap > MAX_ADAPTERS)
-                                       goto ERR;
-                               source_map[i] |= (unsigned long)1 << (adap - 1);
-                       }
-                       else
-                       {
-                               st = map_int(arg2[j], NULL);
-                               end = map_int(sep + 1, NULL);
-                               if (st <= 0 || end <= 0 || st > MAX_ADAPTERS || end > MAX_ADAPTERS || end < st)
-                                       goto ERR;
-                               for (k = st; k <= end; k++)
-                               {
-                                       adap = k;
-                                       source_map[i] |= (unsigned long)1 << (adap - 1);
-                               }
-                       }
-               }
-               buf2[0]='\0';
-               for (j = 1; j <= (la > MAX_ADAPTERS ? MAX_ADAPTERS : la); j++)
-                       if (source_map[i] & ((unsigned long)1 << (j - 1)))
-                               strcat(buf2, "X");
-                       else
-                               strcat(buf2, ".");
-               LOGM(" src=%d using adapters %s (%lu)", i + 1, buf2, (unsigned long)source_map[i]);
-       }
-       LOG("Adapter correct sources format");
-       return;
+		source_map[i] = 0;
+		if (arg[i] && arg[i][0] == '*')
+		{
+			if (strlen(arg[i]) != 1)
+				goto ERR;
+			source_map[i] = all;
+			char buf2[128];
+			buf2[0]='\0';
+			for (j = 1; j <= (la > MAX_ADAPTERS ? MAX_ADAPTERS : la); j++)
+				strcat(buf2, "X");
+			LOGM(" src=%d using adapters %s (%lu)", i + 1, buf2, (unsigned long)source_map[i]);
+			continue;
+		}
+		char buf2[128], *arg2[128];
+		SAFE_STRCPY(buf2, arg[i]);
+		lb = split(arg2, buf2, ARRAY_SIZE(arg2), ',');
+		for (j = 0; j < lb; j++)
+		{
+			sep = strchr(arg2[j], '-');
+			if (sep == NULL)
+			{
+				adap = map_int(arg2[j], NULL);
+				if (adap <= 0 || adap > MAX_ADAPTERS)
+					goto ERR;
+				source_map[i] |= (unsigned long)1 << (adap - 1);
+			}
+			else
+			{
+				st = map_int(arg2[j], NULL);
+				end = map_int(sep + 1, NULL);
+				if (st <= 0 || end <= 0 || st > MAX_ADAPTERS || end > MAX_ADAPTERS || end < st)
+					goto ERR;
+				for (k = st; k <= end; k++)
+				{
+					adap = k;
+					source_map[i] |= (unsigned long)1 << (adap - 1);
+				}
+			}
+		}
+		buf2[0]='\0';
+		for (j = 1; j <= (la > MAX_ADAPTERS ? MAX_ADAPTERS : la); j++)
+			if (source_map[i] & ((unsigned long)1 << (j - 1)))
+				strcat(buf2, "X");
+			else
+				strcat(buf2, ".");
+		LOGM(" src=%d using adapters %s (%lu)", i + 1, buf2, (unsigned long)source_map[i]);
+	}
+	LOG("Adapter correct sources format parameter");
+	return;
 
 ERR:
-       for (i = 0; i < MAX_SOURCES; i++)
-               source_map[i] = all;
-       LOG("Adapter sources format %s, using defaults for all adapters!", strlen(arg[0]) > 0 ? "incorrect" : "missing");
+	for (i = 0; i < MAX_SOURCES; i++)
+		source_map[i] = all;
+	LOG("Adapter sources format parameter %s, using defaults for all adapters!", strlen(arg[0]) > 0 ? "incorrect" : "missing");
 }
 
 

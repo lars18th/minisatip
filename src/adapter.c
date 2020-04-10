@@ -1658,8 +1658,6 @@ void set_sources_adapters(char *o)
 	uint64_t all = 0xFFFFFFFFFFFFFFFF;
 	char buf[1024], *arg[128], *sep;
 	SAFE_STRCPY(buf, o);
-	for (i = 0; i < MAX_ADAPTERS; i++)
-		all = (all << 1) + 1;
 	la = split(arg, buf, ARRAY_SIZE(arg), ':');
 	if ((la == 1 && strlen(arg[0]) == 0) || la < 1 || la > MAX_SOURCES)
 		goto ERR;
@@ -1682,7 +1680,7 @@ void set_sources_adapters(char *o)
 			source_map[i] = all;
 			char buf2[128];
 			buf2[0]='\0';
-			for (j = 1; j <= (la > MAX_ADAPTERS ? MAX_ADAPTERS : la); j++)
+			for (j = 0; j < MAX_ADAPTERS; j++)
 				strcat(buf2, "X");
 			LOGM(" src=%d using adapters %s (%lu)", i + 1, buf2, (unsigned long)source_map[i]);
 			continue;
@@ -1696,26 +1694,26 @@ void set_sources_adapters(char *o)
 			if (sep == NULL)
 			{
 				adap = map_int(arg2[j], NULL);
-				if (adap <= 0 || adap > MAX_ADAPTERS)
+				if (adap < 0 || adap >= MAX_ADAPTERS)
 					goto ERR;
-				source_map[i] |= (unsigned long)1 << (adap - 1);
+				source_map[i] |= (unsigned long)1 << adap;
 			}
 			else
 			{
 				st = map_int(arg2[j], NULL);
 				end = map_int(sep + 1, NULL);
-				if (st <= 0 || end <= 0 || st > MAX_ADAPTERS || end > MAX_ADAPTERS || end < st)
+				if (st < 0 || end < 0 || st >= MAX_ADAPTERS || end >= MAX_ADAPTERS || end < st)
 					goto ERR;
 				for (k = st; k <= end; k++)
 				{
 					adap = k;
-					source_map[i] |= (unsigned long)1 << (adap - 1);
+					source_map[i] |= (unsigned long)1 << adap;
 				}
 			}
 		}
 		buf2[0]='\0';
-		for (j = 1; j <= (la > MAX_ADAPTERS ? MAX_ADAPTERS : la); j++)
-			if (source_map[i] & ((unsigned long)1 << (j - 1)))
+		for (j = 0; j < MAX_ADAPTERS; j++)
+			if (source_map[i] & ((unsigned long)1 << j))
 				strcat(buf2, "X");
 			else
 				strcat(buf2, ".");

@@ -96,12 +96,12 @@ adapter *adapter_alloc()
 	ad->master_source = -1;
 	ad->diseqc_multi = opts.diseqc_multi;
 
-    /* enable sources */
-    int i;
-    for (i = 0; i <= MAX_SOURCES; i++)
-    {
-            ad->sources_pos[i] = 1;
-    }
+	/* enable sources */
+	int i;
+	for (i = 0; i <= MAX_SOURCES; i++)
+	{
+		ad->sources_pos[i] = 1;
+	}
 
 	/* LOF setup */
 	ad->diseqc_param.lnb_low = opts.lnb_low;
@@ -509,13 +509,11 @@ int getAdaptersCount()
 	for (i = 0; i < MAX_ADAPTERS; i++)
 		if ((ad = a[i]))
 		{
-                       // Note: Adapter 1 uses bit 0, and source_map uses ranges from 0..SRC-1
-                       if (i > 0) for (j = 1; j <= MAX_SOURCES; j++)
-                       {
-//                             ad->sources_pos[j] = (source_map[j] >> i) & 1;
-                               ad->sources_pos[j] = (source_map[j-1] >> (i - 1)) & 1;
-//                             ad->sources_pos[j] = 0;
-                       }
+			// Note: Adapter 1 uses bit 0, and source_map uses ranges from 0..SRC-1
+			if (i > 0) for (j = 1; j <= MAX_SOURCES; j++)
+			{
+				ad->sources_pos[j] = (source_map[j-1] >> (i - 1)) & 1;
+			}
 
 			if (!opts.force_sadapter && (delsys_match(ad, SYS_DVBS) || delsys_match(ad, SYS_DVBS2)))
 			{
@@ -584,16 +582,24 @@ int getAdaptersCount()
 			}
 		}
 	}
-    DEBUGM("Current sources assignment: ");
-    for (i = 0; i < MAX_ADAPTERS; i++)
-            if ((ad = a[i]))
-            {
-                    for (j = 1; j <= MAX_SOURCES; j++)
-                    {
-                            if (ad->sources_pos[j])
-                                    DEBUGM("  Adpater %d enabled SRC=%d", i, j);
-                    }
-            }
+	char lsrc[256];
+	for (i = 0; i < MAX_ADAPTERS; i++)
+		if ((ad = a[i]))
+		{
+			lsrc[0] = '\0';
+			for (j = 1; j <= MAX_SOURCES; j++)
+			{
+				if (ad->sources_pos[j])
+				{
+					char usrc[8];
+					sprintf(usrc, ",%d", j);
+					strcat(lsrc, usrc);
+				}
+			}
+			if (strlen(lsrc) > 0)
+				lsrc[0]=' ';
+			DEBUGM("Adpater %d enabled sources:%s", i, lsrc);
+		}
 	return tuner_s2 + tuner_c2 + tuner_t2 + tuner_c + tuner_t;
 }
 

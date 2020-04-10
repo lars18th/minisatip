@@ -87,6 +87,7 @@ int rtsp, http, si, si1, ssdp1;
 #define ENABLE_ADAPTERS_OPT 'e'
 #define UNICABLE_OPT 'u'
 #define JESS_OPT 'j'
+#define SOURCES_OPT 'U'
 #define DISEQC_OPT 'd'
 #define DISEQC_TIMING_OPT 'q'
 #define SLAVE_OPT 'S'
@@ -136,6 +137,7 @@ static const struct option long_options[] =
 		{"enable-adapters", required_argument, NULL, 'e'},
 		{"unicable", required_argument, NULL, 'u'},
 		{"jess", required_argument, NULL, 'j'},
+        {"sources", required_argument, NULL, 'U'},
 		{"diseqc", required_argument, NULL, 'd'},
 		{"diseqc-timing", required_argument, NULL, 'q'},
 		{"diseqc-multi", required_argument, NULL, DISEQC_MULTI},
@@ -460,6 +462,13 @@ Help\n\
 \n\
 * -j --jess jess_string - same format as -u \n\
 \n\
+* -U --sources sources_for_adapters: select the adapters for each source\n\
+       * eg: -U 0-2:*:3:1,5,7 (no spaces between parameters)\n\
+       - In this example: for SRC=1 only 0,1,2; for SRC=2 all: for SRC=3 only 3; and for SRC=4 the 1,5,7 adapters.\n\
+       - For each position (separated by : ) you need to declare all the adapters that use this position\n\
+       - The special char * indicates all adapters for this position\n\
+       - If errors or by default all adapters have enabled all positions\n\
+\n\
 * -w --http-host http_server[:port]: specify the host and the port (if not 80) where the xml file can be downloaded from [default: default_local_ip_address:8080] \n\
 	* eg: -w 192.168.1.1:8080 \n\
 \n\
@@ -526,6 +535,7 @@ void set_options(int argc, char *argv[])
 {
 	int opt;
 	int is_log = 0;
+    int adapter_sources = 0;
 	char *lip;
 	memset(&opts, 0, sizeof(opts));
 	opts.log = 1;
@@ -599,7 +609,7 @@ void set_options(int argc, char *argv[])
 
 #endif
 
-	while ((opt = getopt_long(argc, argv, "fl:v:r:a:td:w:p:s:n:hB:b:H:m:p:e:x:u:j:o:gy:i:q:D:NGVR:S:TX:Y:OL:EP:Z:0:F:M:1:2:3:C:4" AXE_OPTS, long_options, NULL)) != -1)
+	while ((opt = getopt_long(argc, argv, "fl:v:r:a:td:w:p:s:n:hB:b:H:m:p:e:x:u:j:U:o:gy:i:q:D:NGVR:S:TX:Y:OL:EP:Z:0:F:M:1:2:3:C:4" AXE_OPTS, long_options, NULL)) != -1)
 	{
 		//              printf("options %d %c %s\n",opt,opt,optarg);
 		switch (opt)
@@ -812,6 +822,13 @@ void set_options(int argc, char *argv[])
 			set_diseqc_adapters(optarg);
 			break;
 		}
+
+        case SOURCES_OPT:
+        {
+                adapter_sources = 1;
+                set_sources_adapters(optarg);
+                break;
+        }
 
 		case DISEQC_TIMING_OPT:
 		{
@@ -1031,6 +1048,8 @@ void set_options(int argc, char *argv[])
 	}
 	if (!is_log)
 		opts.log = 0;
+    if (!adapter_sources)
+            set_sources_adapters("");
 
 	// FBC setup
 	if (!access("/proc/stb/frontend/0/fbc_connect", W_OK))

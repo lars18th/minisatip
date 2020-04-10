@@ -509,10 +509,10 @@ int getAdaptersCount()
 	for (i = 0; i < MAX_ADAPTERS; i++)
 		if ((ad = a[i]))
 		{
-			// Note: Adapter 1 uses bit 0, and source_map uses ranges from 0..SRC-1
-			if (i > 0) for (j = 1; j <= MAX_SOURCES; j++)
+			// Note: Adapter 0 uses map bit 0, and source_map uses ranges from 0..SRC-1 (SRC=0 can't be configured)
+			for (j = 0; j < MAX_SOURCES; j++)
 			{
-				ad->sources_pos[j] = (source_map[j-1] >> (i - 1)) & 1;
+				ad->sources_pos[j] = (source_map[j-1] >> i) & 1;
 			}
 
 			if (!opts.force_sadapter && (delsys_match(ad, SYS_DVBS) || delsys_match(ad, SYS_DVBS2)))
@@ -749,7 +749,7 @@ int get_free_adapter(transponder *tp)
 	}
 	// provide an already existing adapter
 	for (i = 0; i < MAX_ADAPTERS; i++)
-		if ((ad = get_adapter_nw(i)) && delsys_match(ad, msys))
+		if ((ad = get_adapter_nw(i)) && delsys_match(ad, msys) && ad->sources_pos[tp->diseqc])
 			if (!compare_tunning_parameters(ad->id, tp))
 				return i;
 

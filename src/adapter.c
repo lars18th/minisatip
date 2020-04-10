@@ -96,7 +96,9 @@ adapter *adapter_alloc()
 	ad->master_source = -1;
 	ad->diseqc_multi = opts.diseqc_multi;
 
-	/* enable sources */
+	/* enable all sources */
+	ad->debug_pos[0]='\0';
+	ad->debug_src = 0;
 	int i;
 	for (i = 0; i <= MAX_SOURCES; i++)
 	{
@@ -586,6 +588,8 @@ int getAdaptersCount()
 	for (i = 0; i < MAX_ADAPTERS; i++)
 		if ((ad = a[i]))
 		{
+			ad->debug_pos[0]='\0';
+			ad->debug_src = 0;
 			lsrc[0] = '\0';
 			for (j = 1; j <= MAX_SOURCES; j++)
 			{
@@ -594,11 +598,19 @@ int getAdaptersCount()
 					char usrc[8];
 					sprintf(usrc, ",%d", j);
 					strcat(lsrc, usrc);
+
+					strcat(ad->debug_pos, "X");
+					ad->debug_src += (unsigned long)1 << (j - 1);
+				}
+				else
+				{
+					strcat(ad->debug_pos, ".");
 				}
 			}
 			if (strlen(lsrc) > 0)
 				lsrc[0]=' ';
 			DEBUGM("Adpater %d enabled sources:%s", i, lsrc);
+			DEBUGM("Adpater %d debug sources: %s (%lu)", i, ad->debug_pos, ad->debug_src);
 		}
 	return tuner_s2 + tuner_c2 + tuner_t2 + tuner_c + tuner_t;
 }
@@ -612,10 +624,10 @@ void dump_adapters()
 	LOG("Dumping adapters:");
 	for (i = 0; i < MAX_ADAPTERS; i++)
 		if ((ad = get_adapter_nw(i)))
-			LOG("%d|f: %d sid_cnt:%d master_sid:%d master_source:%d del_sys: %s %s %s", i,
+			LOG("%d|f: %d sid_cnt:%d master_sid:%d master_source:%d del_sys: %s,%s,%s src_map: %s (%lu)", i,
 				ad->tp.freq, ad->sid_cnt, ad->master_sid, ad->master_source,
 				get_delsys(ad->sys[0]), get_delsys(ad->sys[1]),
-				get_delsys(ad->sys[2]));
+				get_delsys(ad->sys[2]), ad->debug_pos, ad->debug_src);
 	dump_streams();
 }
 

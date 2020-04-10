@@ -72,7 +72,9 @@ typedef struct struct_adapter
 	uint32_t pid_err, dec_err;				   // detect pids received but not part of any stream, decrypt errors
 	diseqc diseqc_param;
 	int diseqc_multi;
-	int sources_pos[MAX_SOURCES + 1];
+	int sources_pos[MAX_SOURCES + 1]; // includes SRC=0 used internally only
+	char debug_pos[MAX_SOURCES + 1];
+	uint64_t debug_src;
 	int old_diseqc;
 	int old_hiband;
 	int old_pol;

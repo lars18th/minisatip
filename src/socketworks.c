@@ -604,6 +604,7 @@ int sockets_add(int sock, USockAddr *sa, int sid, int type,
 	ss->lbuf = 0;
 	ss->timeout_ms = 0;
 	ss->id = i;
+	ss->flags = 0;
 	ss->sock_err = 0;
 	ss->overflow = 0;
 	ss->buf_alloc = ss->buf_used = 0;
@@ -1202,6 +1203,14 @@ void set_socket_receive_buffer(int sock, int len)
 	sl = sizeof(int);
 	if (!getsockopt(sock, SOL_SOCKET, SO_RCVBUF, &len, &sl))
 		LOG("receive socket buffer size is %d bytes", len);
+}
+
+void set_socket_disconnect_flag(int sock)
+{
+	sockets *ss = get_sockets(sock);
+	if (!ss)
+		return;
+	ss->flags |= 2;
 }
 
 void set_socket_pos(int sock, int pos)

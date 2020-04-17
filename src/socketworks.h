@@ -45,6 +45,7 @@ typedef struct struct_sockets
 	int iteration;
 	int err;
 	int flags; // 1 - buf is allocated dynamically
+			// 2 - action function knows how to handle rlen <0
 	int events;
 	int64_t last_poll;
 	pthread_t tid;

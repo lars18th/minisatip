@@ -33,6 +33,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
@@ -123,6 +124,7 @@ int http_request(adapter *ad, char *url, char *method);
 
 void satipc_commit(adapter *ad);
 void set_adapter_signal(adapter *ad, char *b, int rlen);
+int satipc_reopen(sockets *s, adapter *ad, satipc *sip);
 
 int satipc_reply(sockets *s)
 {
@@ -133,8 +135,13 @@ int satipc_reply(sockets *s)
 	int la, i, rc;
 	__attribute__((unused)) int rv;
 	get_ad_and_sipr(s->sid, 1);
+	LOG("satipc_reply (adapter %d): receiving from handle %d, sock %d, length %d", s->sid, s->sock, s->id, s->rlen);
+	if (s->rlen < 0)
+	{
+		LOG("satipc RTSP socket remotely closed ", s->sid);
+		return satipc_reopen(s, ad, sip);
+	}
 	s->rlen = 0;
-	LOG("satipc_reply (adapter %d): receiving from handle %d, sock %d", s->sid, s->sock, s->id);
 	LOGM("MSG process << server :\n%s", s->buf);
 
 	if ((timeout = strstr((char *)s->buf, "timeout=")))
@@ -401,8 +408,9 @@ int satipc_open_device(adapter *ad)
 	if ((sip->last_connect > 0) && (ctime - sip->last_connect < 5000))
 		return 3;
 
+	USockAddr sv;
 	sip->last_connect = ctime;
-	ad->fe = tcp_connect_src(sip->sip, sip->sport, NULL, 1, sip->source_ip[0] ? sip->source_ip : NULL); // blocking socket
+	ad->fe = tcp_connect_src(sip->sip, sip->sport, &sv, 1, sip->source_ip[0] ? sip->source_ip : NULL); // blocking socket
 	if (ad->fe < 0)
 		LOG_AND_RETURN(2, "could not connect to %s:%d", sip->sip, sip->sport);
 
@@ -421,7 +429,7 @@ int satipc_open_device(adapter *ad)
 		if (sip->rtcp < 0)
 			LOG("Could not listen on port %d: err %d: %s", sip->listen_rtp + 1, errno, strerror(errno));
 
-		ad->fe_sock = sockets_add(ad->fe, NULL, ad->id, TYPE_TCP,
+		ad->fe_sock = sockets_add(ad->fe, &sv, ad->id, TYPE_TCP,
 								  (socket_action)satipc_reply, (socket_action)satipc_close,
 								  (socket_action)satipc_timeout);
 		sip->rtcp_sock = -1;
@@ -451,7 +459,7 @@ int satipc_open_device(adapter *ad)
 	{
 		ad->dvr = ad->fe;
 		ad->fe = -1;
-		ad->fe_sock = sockets_add(SOCK_TIMEOUT, NULL, ad->id, TYPE_UDP,
+		ad->fe_sock = sockets_add(SOCK_TIMEOUT, &sv, ad->id, TYPE_UDP,
 								  NULL, NULL, (socket_action)satipc_timeout);
 		sockets_timeout(ad->fe_sock, 25000); // 25s
 	}
@@ -566,6 +574,18 @@ int satipc_read(int socket, void *buf, int len, sockets *ss, int *rb)
 	}
 	if (!ad)
 		ad = get_adapter(ss->sid);
+
+	// Workaround for some poor SAT>IP servers (ex. XORO).
+	//	Some servers send KEEP-ALIVE RTP packets without TS payload.
+	//	Then any RTP packet without valid TS data is discarded.
+	uint8_t *b = buf;
+	if (*rb < DVB_FRAME - 12 && b[0] != 0x47)
+	{
+		LOGM("discarding RTP packet without valid TS payload in socket %d (id %d) [len=%d]",socket, ss->id, *rb - 12);
+		*rb = 0;
+		return 1;
+	}
+
 	if (ad && sip->ignore_packets)
 	{
 		*rb = 0;
@@ -823,6 +843,46 @@ void satip_post_init(adapter *ad)
 		http_request(ad, NULL, "OPTIONS");
 	else if (sip->force_commit)
 		satipc_commit(ad);
+}
+
+int satipc_reopen(sockets *s, adapter *ad, satipc *sip)
+{
+	USockAddr sv;
+	int new_sock;
+	int in_queue;
+
+	LOG("satip device %s:%d reopening RTSP socket (%d,%d)", sip->sip, sip->sport, s->sock, ad->fe);
+	if (s->sock != ad->fe || s->sock <= 0)
+		return -1;
+
+	in_queue = sip->want_tune || sip->lap || sip->ldp;
+	// In idle status don't try to reopen, go directly to sleep.
+	if ((sip->last_cmd == 0 || sip->last_cmd == RTSP_TEARDOWN ) && !in_queue)
+		return -2;
+
+	close(s->sock);
+
+	int64_t ctime = getTick();
+	if ((sip->last_connect > 0) && (ctime - sip->last_connect < 2000))
+		return -3;
+
+	sip->last_connect = ctime;
+	new_sock = tcp_connect_src(sip->sip, sip->sport, &sv, 1, sip->source_ip[0] ? sip->source_ip : NULL); // blocking socket
+	if (new_sock < 0)
+		LOG_AND_RETURN(-4, "could not reconnect to %s:%d", sip->sip, sip->sport);
+
+	ad->fe = new_sock;
+	s->sock = new_sock;
+
+	if (sip->force_commit || in_queue)
+	{
+		sip->expect_reply = 0;
+		satipc_commit(ad);
+	}
+	else
+		http_request(ad, NULL, "OPTIONS");
+
+	return 0;
 }
 
 int satipc_set_pid(adapter *ad, int pid)

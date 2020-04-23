@@ -697,28 +697,28 @@ void _log(char *file, int line, unsigned long level, char *fmt, ...)
 
 	switch (level)
 	{
-		case 0:                 lname = "****"; break;
-		case LOG_GENERAL:       lname = "----"; break;
-		case LOG_HTTP:  lname = "HTTP"; break;
-		case LOG_SOCKETWORKS:   lname = "WORK"; break;
-		case LOG_STREAM:        lname = "STRM"; break;
-		case LOG_ADAPTER:       lname = "ADPT"; break;
-		case LOG_SATIPC:        lname = "SIPC"; break;
-		case LOG_PMT:   lname = "PMT "; break;
-		case LOG_TABLES:        lname = "TBLS"; break;
-		case LOG_DVBAPI:        lname = "DAPI"; break;
-		case LOG_LOCK:  lname = "LOCK"; break;
-		case LOG_NETCEIVER:     lname = "NETC"; break;
-		case LOG_DVBCA: lname = "CA  "; break;
-		case LOG_AXE:   lname = "AXE "; break;
-		case LOG_SOCKET:        lname = "SOCK"; break;
-		case LOG_UTILS: lname = "UTIL"; break;
-		case LOG_DMX:   lname = "DMX "; break;
-		case LOG_SSDP:  lname = "SSDP"; break;
-		case LOG_DVB:   lname = "DVB "; break;
-		case LOG_RTSP:  lname = "RTSP"; break;
-			default:
-				lname = "????";
+		case 0:			lname = "****"; break;
+		case LOG_GENERAL:	lname = "----"; break;
+		case LOG_HTTP:		lname = "HTTP"; break;
+		case LOG_SOCKETWORKS:	lname = "WORK"; break;
+		case LOG_STREAM:	lname = "STRM"; break;
+		case LOG_ADAPTER:	lname = "ADPT"; break;
+		case LOG_SATIPC:	lname = "SIPC"; break;
+		case LOG_PMT:		lname = "PMT "; break;
+		case LOG_TABLES:	lname = "TBLS"; break;
+		case LOG_DVBAPI:	lname = "DAPI"; break;
+		case LOG_LOCK:		lname = "LOCK"; break;
+		case LOG_NETCEIVER:	lname = "NETC"; break;
+		case LOG_DVBCA:		lname = "CA  "; break;
+		case LOG_AXE:		lname = "AXE "; break;
+		case LOG_SOCKET:	lname = "SOCK"; break;
+		case LOG_UTILS:		lname = "UTIL"; break;
+		case LOG_DMX:		lname = "DMX "; break;
+		case LOG_SSDP:		lname = "SSDP"; break;
+		case LOG_DVB:		lname = "DVB "; break;
+		case LOG_RTSP:		lname = "RTSP"; break;
+				default:
+					lname = "????";
 	}
 	if (!fmt)
 	{

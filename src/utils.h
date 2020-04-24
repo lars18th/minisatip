@@ -183,7 +183,10 @@ static inline int get_index_hash(void *p, int max, int struct_size, uint32_t key
 	{                                                   \
 			_log(__FILE__, __LINE__, DEFAULT_LOG, a, ##__VA_ARGS__); \
 	}
-
+#define LOGG(level, a, ...)                                     \
+	{                                                   \
+			_log(__FILE__, __LINE__, level, a, ##__VA_ARGS__); \
+	}
 #define LOGM(a, ...) LOGL(DEFAULT_LOG, a, ##__VA_ARGS__)
 
 #define DEBUGL(level, a, ...)                           \

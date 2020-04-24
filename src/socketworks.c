@@ -565,7 +565,6 @@ int sockets_add(int sock, USockAddr *sa, int sid, int type,
 	int i;
 	char ra[50];
 	sockets *ss;
-	int lport = (sa && sa->lport > 0 && !(sa->sa.sa_data)) ? sa->lport : 0;
 
 	if (sock < 0 && sock != SOCK_TIMEOUT)
 		LOG_AND_RETURN(-1, "sockets_add does not add negative sockets %d", sock);

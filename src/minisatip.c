@@ -1086,7 +1086,7 @@ int read_rtsp(sockets *s)
 
 		int rtsp_len = s->buf[2] * 256 + s->buf[3];
 		LOGG(log_level, "Received %s over tcp packet (sock_id %d) sid %d, rlen %d, packet len: %d, type %02X %02X discarding %s...",
-			s->type == 3 ? "HTTP" : "RTSP" , s->id, s->sid, s->rlen, rtsp_len, s->buf[4], s->buf[5],
+			s->type == TYPE_HTTP ? "HTTP" : "RTSP" , s->id, s->sid, s->rlen, rtsp_len, s->buf[4], s->buf[5],
 			(s->rlen == rtsp_len + 4) ? "complete" : "fragment");
 		if (s->rlen >= rtsp_len + 4)
 		{ // we did not receive the entire packet
@@ -1128,7 +1128,7 @@ int read_rtsp(sockets *s)
 	rlen = s->rlen;
 	s->rlen = 0;
 
-	LOGG(log_level, "Read %s (sid %d) [%s:%d] len: %d sock %d (handle %d)", s->type == 3 ? "HTTP" : "RTSP" ,
+	LOGG(log_level, "Read %s (sid %d) [%s:%d] len: %d sock %d (handle %d)", s->type == TYPE_HTTP ? "HTTP" : "RTSP" ,
 		s->sid, get_sockaddr_host(s->sa, ra, sizeof(ra)), get_sockaddr_port(s->sa),
 		rlen, s->id, s->sock);
 	LOGL(log_level, "MSG client >> process :\n%s", s->buf);
@@ -1424,7 +1424,7 @@ int read_http(sockets *s)
 	int secs = seconds;
 	sprintf(opts.time_running, "%.0d%s%02d:%02d:%02d", days, days > 0 ? "d " : "", hours, mins, secs);
 
-	LOGG(log_level, "Read %s (sid %d) [%s:%d] sock %d (handle %d)", s->type == 3 ? "HTTP" : "RTSP", s->sid,
+	LOGG(log_level, "Read %s (sid %d) [%s:%d] sock %d (handle %d)", s->type == TYPE_HTTP ? "HTTP" : "RTSP", s->sid,
 		get_sockaddr_host(s->sa, ra, sizeof(ra)), get_sockaddr_port(s->sa),
 		s->id, s->sock);
 	LOGL(log_level, "MSG client >> process :\n%s", s->buf);
@@ -1537,7 +1537,7 @@ int close_http(sockets *s)
 		free1(s->buf);
 	s->flags = 0;
 	s->buf = NULL;
-	LOGG(log_level, "Requested %s close (sid %d) [%s:%d] timeout %d type %d sock %d (handle %d)", s->type == 3 ? "HTTP" : "RTSP",
+	LOGG(log_level, "Requested %s close (sid %d) [%s:%d] timeout %d type %d sock %d (handle %d)", s->type == TYPE_HTTP ? "HTTP" : "RTSP",
 		s->sid, get_sockaddr_host(s->sa, ra, sizeof(ra)), get_sockaddr_port(s->sa),
 		sid ? sid->timeout : -1, sid ? sid->type : -1, s->id, s->sock);
 	if (sid && ((sid->type == STREAM_RTSP_UDP && sid->timeout != 0) || (sid->type == 0 && sid->timeout != 0)))
@@ -1985,7 +1985,7 @@ void http_response(sockets *s, int rc, char *ah, char *desc, int cseq, int lr)
 	else
 		strlcatf(resp, sizeof(resp) - 1, lresp, "\r\n");
 
-	LOGG(log_level, "Reply %s %s(sid %d) [%s:%d] content_len:%d, sock %d (handle %d)", s->type == 3 ? "HTTP" : "RTSP" ,
+	LOGG(log_level, "Reply %s %s(sid %d) [%s:%d] content_len:%d, sock %d (handle %d)", s->type == TYPE_HTTP ? "HTTP" : "RTSP" ,
 		(lresp == sizeof(resp) - 1) ? "(message truncated) " : "", s->sid,
 		get_sockaddr_host(s->sa, ra, sizeof(ra)), get_sockaddr_port(s->sa),
 		lr, s->id, s->sock);

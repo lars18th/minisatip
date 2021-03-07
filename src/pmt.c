@@ -1624,15 +1624,16 @@ int process_pmt(int filter, unsigned char *b, int len, void *opaque) {
     pmt_len = len - 4;
 
     pi_len = ((b[10] & 0xF) << 8) + b[11];
+    pcr_pid = ((b[8] & 0x1F) << 8) + b[9];
 
     pmt->sid = b[3] * 256 + b[4];
     pmt->version = ver;
 
     mutex_lock(&pmt->mutex);
-    LOG("new PMT %d AD %d, pid: %04X (%d), len %d, pi_len %d, ver %d, sid "
+    LOG("new PMT %d AD %d, pid: %04X (%d), len %d, pi_len %d, ver %d, pcr %d, sid "
         "%04X "
         "(%d) %s %s",
-        pmt->id, ad->id, pid, pid, pmt_len, pi_len, ver, pmt->sid, pmt->sid,
+        pmt->id, ad->id, pid, pid, pmt_len, pi_len, ver, pcr_pid, pmt->sid, pmt->sid,
         pmt->name[0] ? "channel:" : "", pmt->name);
     pi = b + 12;
     pmt_b = pi + pi_len;
@@ -1706,6 +1707,7 @@ int process_pmt(int filter, unsigned char *b, int len, void *opaque) {
             cp->pmt = pmt->master_pmt;
         }
     }
+    // Add the PCR pid if it's independent
 
     if (pmt->first_active_pid < 0)
         pmt->first_active_pid = pmt->active_pid[0];

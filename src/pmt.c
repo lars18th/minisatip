@@ -1559,7 +1559,7 @@ int get_master_pmt_for_pid(int aid, int pid) {
 }
 
 int process_pmt(int filter, unsigned char *b, int len, void *opaque) {
-    int pi_len = 0, isAC3, pmt_len = 0, i, es_len, ver;
+    int pi_len = 0, isAC3, pmt_len = 0, i, es_len, ver, pcr_pid;
     int enabled_channels = 0;
     unsigned char *pmt_b, *pi;
     int pid, spid, stype;

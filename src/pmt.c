@@ -1559,7 +1559,7 @@ int get_master_pmt_for_pid(int aid, int pid) {
 }
 
 int process_pmt(int filter, unsigned char *b, int len, void *opaque) {
-    int pi_len = 0, isAC3, pmt_len = 0, i, es_len, ver, pcr_pid;
+    int pi_len = 0, isAC3, pmt_len = 0, i, es_len, ver, pcr_pid = 0;
     int enabled_channels = 0;
     unsigned char *pmt_b, *pi;
     int pid, spid, stype;
@@ -1660,6 +1660,8 @@ int process_pmt(int filter, unsigned char *b, int len, void *opaque) {
             isAC3 = is_ac3_es(pmt_b + i + 5, es_len);
         else if (stype == 129)
             isAC3 = 1;
+        if (pcr_pid == spid)
+            pcr_pid = 0;
 
         if (pmt->stream_pids < MAX_PMT_PIDS - 1) {
             pmt->stream_pid[pmt->stream_pids].type = stype;
@@ -1708,6 +1710,15 @@ int process_pmt(int filter, unsigned char *b, int len, void *opaque) {
         }
     }
     // Add the PCR pid if it's independent
+    if (pcr_pid > 0 && pcr_pid < 8191)
+    {
+        if (pmt->stream_pids < MAX_PMT_PIDS - 1) {
+            pmt->stream_pid[pmt->stream_pids].type = 0;
+            pmt->stream_pid[pmt->stream_pids++].pid = pcr_pid;
+            LOG("added independent PCR pid %d for pmt %d", pcr_pid, pmt->id);
+        } else
+            LOG("Too many pids for pmt %d, discarding prc_pid %d", pmt->id, pcr_pid);
+    }
 
     if (pmt->first_active_pid < 0)
         pmt->first_active_pid = pmt->active_pid[0];

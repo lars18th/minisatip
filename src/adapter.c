@@ -1989,15 +1989,15 @@ void set_signal_multiplier(char *o) {
         if (!sep1 || !sep2)
             continue;
 
-        if (sep1[1]=='%' || sep1[1]=='#') {
-            force_strength_mode = sep1[1]=='%'? 1 : 2;
+        if (sep1[1]=='#' || sep1[1]=='@') {
+            force_strength_mode = sep1[1]=='#'? 1 : 2;
             strength_multiplier = strtod(sep1 + 2, NULL);
         } else {
             force_strength_mode = 0;
             strength_multiplier = strtod(sep1 + 1, NULL);
         }
-        if (sep2[1]=='%' || sep2[1]=='#') {
-            force_snr_mode = sep2[1]=='%'? 1 : 2;
+        if (sep2[1]=='#' || sep2[1]=='@') {
+            force_snr_mode = sep2[1]=='#'? 1 : 2;
             snr_multiplier = strtod(sep2 + 2, NULL);
         } else {
             force_snr_mode = 0;

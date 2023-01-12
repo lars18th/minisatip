@@ -2020,6 +2020,14 @@ void http_response(sockets *s, int rc, char *ah, char *desc, int cseq, int lr) {
     else
         proto = "RTSP";
 
+    // Check if it's a "reget" (successive non-standard HTTP request when streaming)
+    // Used when one HTTP client wants to change pids with a new GET request.
+    if (s->type == TYPE_HTTP && s->iteration > 1 && rc == 200) {
+        LOG("No HTTP Reply because another GET while streaming (handle %d) [%s:%d] iteration:%d, sock %d", s->sock,
+            get_sockaddr_host(s->sa, ra, sizeof(ra)), get_sockaddr_port(s->sa), s->iteration, s->id);
+        return;
+    }
+
     if (!ah || !ah[0])
         ah = public_str;
     if (!desc)

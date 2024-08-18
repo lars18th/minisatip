@@ -11,6 +11,7 @@ jobs:
       with:
         fetch-depth: '0'
     - uses: goto-bus-stop/setup-zig@v2
+
     - name: Build MIPS-MUSL
       run: |
        ./configure --disable-netcv --enable-static --host=mipsel-linux-musl CC="zig cc -target mipsel-linux-musl -static"

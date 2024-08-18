@@ -11,11 +11,17 @@ jobs:
     - uses: actions/checkout@v4
       with:
         fetch-depth: '0'
-    - name: Build MIPS
+    - name: Build MIPS-MUSL
       run: |
        ./configure --disable-netcv --enable-static --host=mipsel-linux-musl CC="zig cc -target mipsel-linux-musl -static"
        make EXTRA_CFLAGS="-I/sysroot/mipsel/include -L/sysroot/mipsel/lib" EMBEDDED=1
-       zip -9 -r /minisatip_mips.zip minisatip html
+
+    - name: Build MIPS-GNU
+      run: |
+       make clean
+       ./configure --disable-netcv --enable-static --host=mipsel-linux-gnu CC="zig cc -target mipsel-linux-gnueabihf.2.32 -static"
+       make EXTRA_CFLAGS="-I/sysroot/mipsel/include -L/sysroot/mipsel/lib" EMBEDDED=1
+       zip -9 -r /minisatip_mips-gnu.zip minisatip html
 
     - name: Archive built binaries
       uses: actions/upload-artifact@v4

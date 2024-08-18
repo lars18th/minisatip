@@ -5,6 +5,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container: catalinii/minisatip-build-image:latest
     
     steps:
     - uses: actions/checkout@v4
@@ -14,6 +15,7 @@ jobs:
 
     - name: Build MIPS-MUSL
       run: |
+       mv /opt/zig /opt/zig.disabled
        ./configure --disable-netcv --enable-static --host=mipsel-linux-musl CC="zig cc -target mipsel-linux-musl -static"
        make EXTRA_CFLAGS="-I/sysroot/mipsel/include -L/sysroot/mipsel/lib" EMBEDDED=1
 

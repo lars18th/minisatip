@@ -18,6 +18,7 @@ jobs:
        mv /opt/zig /opt/zig.disabled
        ./configure --disable-netcv --enable-static --host=mipsel-linux-musl CC="zig cc -target mipsel-linux-musl -static -Wno-error=date-time"
        make EXTRA_CFLAGS="-I/sysroot/mipsel/include -L/sysroot/mipsel/lib" EMBEDDED=1
+       zip -9 -r /minisatip_mips-musl.zip minisatip html
 
     - name: Build MIPS-GNU
       run: |
@@ -31,4 +32,5 @@ jobs:
       with:
         name: minisatip
         path: |
-          /minisatip_mips.zip
+          /minisatip_mips-musl.zip
+          /minisatip_mips-gnu.zip

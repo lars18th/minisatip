@@ -19,19 +19,19 @@ jobs:
       run: |
        ./configure --disable-netcv --enable-static --host=mipsel-linux-musl CC="zig cc -target mipsel-linux-musl -static -Wno-error=date-time"
        make EXTRA_CFLAGS="-I/sysroot/mipsel/include -L/sysroot/mipsel/lib" EMBEDDED=1
-       zip -9 -r /minisatip_mips-musl.zip minisatip html
+       zip -9 -r /tmp/minisatip_mips-musl.zip minisatip html
 
     - name: Build MIPS-GNU
       run: |
        make clean
        ./configure --disable-netcv --enable-static --host=mipsel-linux-gnu CC="zig cc -target mipsel-linux-gnueabihf.2.30 -static -Wno-error=date-time"
        make EXTRA_CFLAGS="-I/sysroot/mipsel/include -L/sysroot/mipsel/lib" EMBEDDED=1
-       zip -9 -r /minisatip_mips-gnu.zip minisatip html
+       zip -9 -r /tmp/minisatip_mips-gnu.zip minisatip html
 
     - name: Archive built binaries
       uses: actions/upload-artifact@v4
       with:
         name: minisatip
         path: |
-          /minisatip_mips-musl.zip
-          /minisatip_mips-gnu.zip
+          /tmp/minisatip_mips-musl.zip
+          /tmp/minisatip_mips-gnu.zip

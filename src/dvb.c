@@ -876,7 +876,7 @@ int send_diseqc(adapter *ad, int fd, int pos, int pos_change, int pol,
         LOG("send_diseqc: FE_SET_TONE failed for fd %d: %s", fd,
             strerror(errno));
     // Enforce HIGH-VOLTAGE (FE_ENABLE_HIGH_LNB_VOLTAGE==FE_SET_VOLTAGE+1)
-    ioctl(fd, FE_SET_VOLTAGE + 1, 1)
+    ioctl(fd, FE_SET_VOLTAGE + 1, 1);
     if (ioctl(fd, FE_SET_VOLTAGE, pol ? SEC_VOLTAGE_18 : SEC_VOLTAGE_13) == -1)
         LOG("send_diseqc: FE_SET_VOLTAGE failed for fd %d: %s", fd,
             strerror(errno));
